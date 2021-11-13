@@ -17,7 +17,6 @@ class Sequencer
     public function __construct($dna)
     {
          $this->dna = $dna;
-         $this->structureDna();
     }
 
     public function getDna(): Collection
@@ -85,17 +84,15 @@ class Sequencer
     protected function runer($direction, $i, $matrix, $foundMutation)
     {
         for ($j=0; $j < $this->n; $j++) {
-            if ($direction == 'oblique') {
-                if ($i + 3 < $this->n && $j + 3 < $this->n) {
-                    if ($this->seekerOblique($matrix, $i, $j)) {
-                        $j = $j + 4;
-                        $i = $i + 4;
-                        $foundMutation++;
-                    }
+            if ($direction == 'oblique' && $i + 3 < $this->n && $j + 3 < $this->n) {
+                if ($this->seekerOblique($matrix, $i, $j)) {
+                    $j = $j + 4;
+                    $i = $i + 4;
+                    $foundMutation++;
                 }
             }
 
-            if ($j + 3 < $this->n) {
+            if ($direction == 'lineal' && $j + 3 < $this->n) {
                 if ($this->seeker($matrix, $i, $j)) {
                     $j = $j + 4;
                     $foundMutation++;
@@ -124,6 +121,8 @@ class Sequencer
     public function hasMutation(): bool
     {
 
+        $this->structureDna();
+        
         $has = $this->check() || $this->check('oblique');
 
         $this->save($has);
@@ -143,58 +142,3 @@ class Sequencer
          ]);
     }
 }
-
-
-// public function checkLineal()
-    // {
-    //     $foundMutation = 0;
-    //     $matrix = $this->matrix;
-    //     for ($rotate=0; $rotate < 2; $rotate++) {
-    //         $matrix = $this->rotateMatrix($matrix, $rotate);
-    //         for ($i=0; $i < $this->n; $i++) {
-    //             for ($j=0; $j < $this->n; $j++) {
-    //                 if ($j + 3 < $this->n) {
-    //                     $segmentOne  = $matrix[$i][$j] == $matrix[$i][$j + 1];
-    //                     $segmentTwo  = $matrix[$i][$j + 2] == $matrix[$i][$j + 3];
-    //                     $corners = $matrix[$i][$j] == $matrix[$i][$j + 3];
-    //                     $hasMutation = $corners && $segmentOne && $segmentTwo;
-    //                     if ($hasMutation) {
-    //                         $foundMutation++;
-    //                         $j = $j + 4;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return $foundMutation > 1;
-    // }
-
-// public function checkOblique()
-    // {
-    //     $matrix = $this->matrix;
-    //     $foundMutation = false;
-    //     for ($rotate=0; $rotate < 2; $rotate++) {
-    //         $matrix = $this->rotateMatrix($matrix, $rotate);
-    //         for ($i=0; $i < $this->n; $i++) {
-    //             $ii = $i;
-    //             for ($j=0; $j < $this->n; $j++) {
-    //                 if ($ii + 3 < $this->n && $j + 3 < $this->n) {
-    //                     $segmentOne  = $matrix[$ii][$j] == $matrix[$ii + 1][$j + 1];
-    //                     $segmentTwo  = $matrix[$ii + 2][$j + 2] == $matrix[$ii + 3][$j + 3];
-    //                     $corners = $matrix[$ii][$j] == $matrix[$ii + 3][$j + 3];
-    //                     $hasMutation = $corners && $segmentOne && $segmentTwo;
-    //                     if ($hasMutation) {
-    //                         $j = $j + 4;
-    //                         $ii = $ii + 4;
-    //                         $foundMutation++;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return $foundMutation > 1;
-    // }
-
-/* dd($matrix[$i][$j], $matrix[$i][$j + 1], $matrix[$i][$j] == $matrix[$i][$j + 1]);
-   echo $matrix[$i][$j] . $matrix[$i][$j + 1] . $matrix[$i][$j + 2] . $matrix[$i][$j + 3] ."<br>";
-   echo $matrix[$ii][$j] . $matrix[$ii + 1][$j + 1] . $matrix[$ii + 2][$j + 2] . $matrix[$ii + 3][$j+ 3] ."<br>"; */

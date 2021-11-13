@@ -19,7 +19,7 @@ class Mutation extends Model
 
     public static function getStats()
     {
-
+        $sequences = self::where('sequence->has_mutation', true)->get();
         $countMutations = self::where('sequence->has_mutation', true)->get()->count();
         $countNoMutations =  self::where('sequence->has_mutation', false)->get()->count();
         return [
