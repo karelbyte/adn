@@ -124,19 +124,23 @@ class Sequencer
     public function hasMutation(): bool
     {
 
-        return $this->check() || $this->check('oblique');
+        $has = $this->check() || $this->check('oblique');
+
+        $this->save($has);
+
+        return $has;
     }
 
 
-    public function save()
+    public function save($has)
     {
-         $this->getDna()->each(function ($sequence) {
-            Mutation::create([
-               'sequence' => $sequence
-            ]);
-         });
-
-        return $this;
+        Mutation::create([
+            'sequence' => [
+                'dna' => $this->dna,
+                'secuences' => count($this->dna),
+                'has_mutation' => $has
+            ]
+         ]);
     }
 }
 

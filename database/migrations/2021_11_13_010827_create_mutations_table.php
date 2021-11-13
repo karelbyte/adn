@@ -15,7 +15,7 @@ class CreateMutationsTable extends Migration
     {
         Schema::create('mutations', function (Blueprint $table) {
             $table->id();
-            $table->string('sequence');
+            $table->json('sequence');
             $table->timestamps();
         });
     }

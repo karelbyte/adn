@@ -36,13 +36,9 @@ class MutationController extends Controller
     public function getStats()
     {
         try {
-            $stats = [
-                "count_mutations" =>  40,
-                "count_no_mutation" => 100,
-                "ratio" => 0.4
-            ];
 
-            return response()->json($stats);
+            return response()->json(Mutation::getStats());
+
         } catch (Exception $exception) {
             return response()->json($exception->getMessage(), 500);
         }
