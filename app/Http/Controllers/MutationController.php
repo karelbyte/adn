@@ -13,7 +13,6 @@ class MutationController extends Controller
     public function addSecuence(StoreRequest $request)
     {
         try {
-
             if (!$request->has('dna')) {
                 return response()->json('The DNA field was not found!');
             }
@@ -24,12 +23,11 @@ class MutationController extends Controller
                 return response()->json('The DNA is broken :(');
             }
 
+            if ($sequencer->hasMutation()) {
+                return response()->json(null, 200);
+            };
 
-
-            return $sequencer->check();
-    
-            //return $sequencer->getDna();
-            
+            return response()->json(null, 403);
         } catch (Exception $exception) {
             return response()->json($exception->getMessage(), 500);
         }

@@ -17,6 +17,7 @@ class Sequencer
     public function __construct($dna)
     {
          $this->dna = $dna;
+         $this->structureDna();
     }
 
     public function getDna(): Collection
@@ -37,9 +38,9 @@ class Sequencer
         return $broke;
     }
 
-    protected function structureMatrix()
+    protected function structureDna()
     {
-        $this->n = strlen($this->dna[0]);
+        $this->n = $this->getDna()->count();
 
         for ($i=0; $i < $this->n; $i++) {
             for ($j=0; $j < $this->n; $j++) {
@@ -48,81 +49,82 @@ class Sequencer
         }
     }
 
-    public function rotateMatrix($matrix, $rotate)
+    public function rotateDna($matrix, $rotate)
     {
+        $ret = $matrix;
         if ($rotate != 0) {
             for ($i = 0; $i < $this->n; $i++) {
                 for ($j = 0; $j < $this->n; $j++) {
-                    $matrix[$i][$j] = $matrix[$this->n - $j - 1][$i];
+                    $ret[$i][$j] = $matrix[$this->n - $j - 1][$i];
                 }
             }
-            echo $rotate;
-            $this->rotateMatrix($matrix, $rotate - 1);
-        } else {
-            dd($matrix);
+            $this->rotateDna($ret, $rotate - 1);
         }
+        return $ret;
     }
 
-    public function checkLineal()
+    
+
+    protected function seeker($matrix, $i, $j)
     {
-        $hasMutation = false;
-        $matrix = $this->matrix;
-        for ($i=0; $i < $this->n; $i++) {
-            for ($j=0; $j < $this->n; $j++) {
-                if ($j + 3 < $this->n) {
-                    $segmentOne  = $matrix[$i][$j] == $matrix[$i][$j + 1];
-                    $segmentTwo  = $matrix[$i][$j + 2] == $matrix[$i][$j + 3];
-                    $corners = $matrix[$i][$j] == $matrix[$i][$j + 3];
-                    $hasMutation = $corners &&  $segmentOne && $segmentTwo;
-                    if ($hasMutation) {
-                        // dd($matrix[$i][$j], $matrix[$i][$j + 1], $matrix[$i][$j] == $matrix[$i][$j + 1]);
-                        echo $matrix[$i][$j] . $matrix[$i][$j + 1] . $matrix[$i][$j + 2] . $matrix[$i][$j + 3] ."<br>" ;
-                    }
-                }
-            }
-        }
-        return $hasMutation;
+        $segmentOne  = $matrix[$i][$j] == $matrix[$i][$j + 1];
+        $segmentTwo  = $matrix[$i][$j + 2] == $matrix[$i][$j + 3];
+        $corners = $matrix[$i][$j] == $matrix[$i][$j + 3];
+        return $corners && $segmentOne && $segmentTwo;
     }
 
-    public function checkOblique()
+    protected function seekerOblique($matrix, $i, $j)
     {
-        $matrix = $this->matrix;
-        $hasMutation = false;
-        for ($i=0; $i < $this->n; $i++) {
-            for ($j=0; $j < $this->n; $j++) {
+        $segmentOne  = $matrix[$i][$j] == $matrix[$i + 1][$j + 1];
+        $segmentTwo  = $matrix[$i + 2][$j + 2] == $matrix[$i + 3][$j + 3];
+        $corners = $matrix[$i][$j] == $matrix[$i + 3][$j + 3];
+        return $corners && $segmentOne && $segmentTwo;
+    }
+
+
+    protected function runer($direction, $i, $matrix, $foundMutation)
+    {
+        for ($j=0; $j < $this->n; $j++) {
+            if ($direction == 'oblique') {
                 if ($i + 3 < $this->n && $j + 3 < $this->n) {
-                    $segmentOne  = $matrix[$i][$j] == $matrix[$i + 1][$j + 1];
-                    $segmentTwo  = $matrix[$i + 2][$j + 2] == $matrix[$i + 3][$j + 3];
-                    $corners = $matrix[$i][$j] == $matrix[$i + 3][$j + 3];
-                    $hasMutation = $corners &&  $segmentOne && $segmentTwo;
-                    if ($hasMutation) {
-                        // dd($matrix[$i][$j], $matrix[$i][$j + 1], $matrix[$i][$j] == $matrix[$i][$j + 1]);
-                        echo $matrix[$i][$j] . $matrix[$i + 1][$j + 1] . $matrix[$i + 2][$j + 2] . $matrix[$i + 3][$j+ 3] ."<br>" ;
+                    if ($this->seekerOblique($matrix, $i, $j)) {
+                        $j = $j + 4;
+                        $i = $i + 4;
+                        $foundMutation++;
                     }
                 }
             }
+
+            if ($j + 3 < $this->n) {
+                if ($this->seeker($matrix, $i, $j)) {
+                    $j = $j + 4;
+                    $foundMutation++;
+                }
+            }
         }
-        return $hasMutation;
+
+        return $foundMutation;
     }
 
-    public function check(): bool
+    public function check($direction = 'lineal')
+    {
+        $matrix = $this->matrix;
+        $foundMutation = 0;
+        for ($rotate = 0; $rotate < 2; $rotate++) {
+            $matrix = $this->rotateDna($matrix, $rotate);
+            for ($i=0; $i < $this->n; $i++) {
+                $foundMutation += $this->runer($direction, $i, $matrix, $foundMutation);
+            }
+        }
+        return $foundMutation > 1;
+    }
+
+    
+
+    public function hasMutation(): bool
     {
 
-        $this->structureMatrix();
-
-        $this->checkLineal();
-        
-        $this->rotateMatrix($this->matrix, 3);
-
-        $this->checkLineal();
-
-        // $this->checkOblique();
-        // $this->rotateMatrix();
-        // $this->rotateMatrix();
-        // $this->rotateMatrix();
-        // $this->checkOblique();
-
-        return true;
+        return $this->check() || $this->check('oblique');
     }
 
 
@@ -136,26 +138,59 @@ class Sequencer
 
         return $this;
     }
-
-
-    /*int[,] array = new int[4,4] {
-    { 1,2,3,4 },
-    { 5,6,7,8 },
-    { 9,0,1,2 },
-    { 3,4,5,6 }
-};
-
-int[,] rotated = RotateMatrix(array, 4);
-
-static int[,] RotateMatrix(int[,] matrix, int n) {
-    int[,] ret = new int[n, n];
-
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            ret[i, j] = matrix[n - j - 1, i];
-        }
-    }
-
-    return ret;
-}*/
 }
+
+
+// public function checkLineal()
+    // {
+    //     $foundMutation = 0;
+    //     $matrix = $this->matrix;
+    //     for ($rotate=0; $rotate < 2; $rotate++) {
+    //         $matrix = $this->rotateMatrix($matrix, $rotate);
+    //         for ($i=0; $i < $this->n; $i++) {
+    //             for ($j=0; $j < $this->n; $j++) {
+    //                 if ($j + 3 < $this->n) {
+    //                     $segmentOne  = $matrix[$i][$j] == $matrix[$i][$j + 1];
+    //                     $segmentTwo  = $matrix[$i][$j + 2] == $matrix[$i][$j + 3];
+    //                     $corners = $matrix[$i][$j] == $matrix[$i][$j + 3];
+    //                     $hasMutation = $corners && $segmentOne && $segmentTwo;
+    //                     if ($hasMutation) {
+    //                         $foundMutation++;
+    //                         $j = $j + 4;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return $foundMutation > 1;
+    // }
+
+// public function checkOblique()
+    // {
+    //     $matrix = $this->matrix;
+    //     $foundMutation = false;
+    //     for ($rotate=0; $rotate < 2; $rotate++) {
+    //         $matrix = $this->rotateMatrix($matrix, $rotate);
+    //         for ($i=0; $i < $this->n; $i++) {
+    //             $ii = $i;
+    //             for ($j=0; $j < $this->n; $j++) {
+    //                 if ($ii + 3 < $this->n && $j + 3 < $this->n) {
+    //                     $segmentOne  = $matrix[$ii][$j] == $matrix[$ii + 1][$j + 1];
+    //                     $segmentTwo  = $matrix[$ii + 2][$j + 2] == $matrix[$ii + 3][$j + 3];
+    //                     $corners = $matrix[$ii][$j] == $matrix[$ii + 3][$j + 3];
+    //                     $hasMutation = $corners && $segmentOne && $segmentTwo;
+    //                     if ($hasMutation) {
+    //                         $j = $j + 4;
+    //                         $ii = $ii + 4;
+    //                         $foundMutation++;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return $foundMutation > 1;
+    // }
+
+/* dd($matrix[$i][$j], $matrix[$i][$j + 1], $matrix[$i][$j] == $matrix[$i][$j + 1]);
+   echo $matrix[$i][$j] . $matrix[$i][$j + 1] . $matrix[$i][$j + 2] . $matrix[$i][$j + 3] ."<br>";
+   echo $matrix[$ii][$j] . $matrix[$ii + 1][$j + 1] . $matrix[$ii + 2][$j + 2] . $matrix[$ii + 3][$j+ 3] ."<br>"; */
