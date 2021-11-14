@@ -48,7 +48,7 @@ class Sequencer
         }
     }
 
-    public function rotateDna($matrix, $rotate)
+    public function rotateDna($matrix, $rotate): array
     {
         $ret = $matrix;
         if ($rotate != 0) {
@@ -103,7 +103,7 @@ class Sequencer
         return $foundMutation;
     }
 
-    public function check($direction = 'lineal')
+    protected function check($direction = 'lineal')
     {
         $matrix = $this->matrix;
         $foundMutation = 0;
@@ -122,7 +122,7 @@ class Sequencer
     {
 
         $this->structureDna();
-        
+
         $has = $this->check() || $this->check('oblique');
 
         $this->save($has);
@@ -131,7 +131,7 @@ class Sequencer
     }
 
 
-    public function save($has)
+    protected function save($has)
     {
         Mutation::create([
             'sequence' => [

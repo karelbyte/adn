@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Sequencer;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class ClassSequencerTest extends TestCase
 {
@@ -16,17 +16,23 @@ class ClassSequencerTest extends TestCase
     {
 
         $data = [
-            "dna" => [
+    
                 "CGAGAG",
                 "CATCDC",
                 "TACTCT",
                 "ATCGGA",
+                "TGCTGT",
                 "TGCTGT"
-            ]
+        
           ];
 
         $sequencer = new Sequencer($data);
 
-        $this->assertTrue($sequencer);
+    
+        $this->assertTrue(is_bool($sequencer->hasDnaSecuencesError()));
+
+        $this->assertTrue(is_array($sequencer->rotateDna($data, 1)));
+
+        $this->assertTrue(is_bool($sequencer->hasMutation()));
     }
 }
