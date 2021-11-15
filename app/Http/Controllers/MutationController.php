@@ -5,14 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Mutation;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreRequest;
-use App\Models\Sequencer;
+use App\Dna\Sequencer;
 use Exception;
 
 class MutationController extends Controller
 {
     public function addSecuence(StoreRequest $request)
     {
-        try {
+         try {
+
             if (!$request->has('dna')) {
                 return response()->json('The DNA field was not found!');
             }
@@ -23,11 +24,14 @@ class MutationController extends Controller
                 return response()->json('The DNA is broken :(');
             }
 
+            return $sequencer->hasMutation();
+
             if ($sequencer->hasMutation()) {
                 return response()->json(null, 200);
             };
 
             return response()->json(null, 403);
+
         } catch (Exception $exception) {
             return response()->json($exception->getMessage(), 500);
         }
