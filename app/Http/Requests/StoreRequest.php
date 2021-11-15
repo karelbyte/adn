@@ -24,7 +24,7 @@ class StoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'dna' => 'required|array'
+            'dna' => 'required|array|min:4'
         ];
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Dna;
 
 use App\Models\Mutation;
+use Exception;
 use Illuminate\Routing\Pipeline;
 use Illuminate\Support\Collection;
 
@@ -18,22 +19,25 @@ class Sequencer
     }
 
    
-    public function hasDnaSecuencesError(): bool
+    public function checkDnaSecuencesError()
     {
         if (count($this->data['dna']) < 4) {
-            return true;
+            throw new Exception('The DNA is broken, n < 4');
         }
 
         $broke = collect($this->data['dna'])->contains(function ($sequence) {
             return strlen($sequence) < 4;
         });
 
-        return $broke;
+        if ($broke) {
+            throw new Exception('The DNA is broken, sequence < 4');
+        }
+
     }
 
 
    
-    public function hasMutation()
+    public function hasMutation(): bool
     {
 
        
