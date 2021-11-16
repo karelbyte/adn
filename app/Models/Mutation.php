@@ -21,7 +21,7 @@ class Mutation extends Model
     {
         $countMutations = self::where('sequence->countMutation', '>', 0)->get()->count();
         $countNoMutations =  self::where('sequence->countMutation', 0)->get()->count();
-        $ratio = $countNoMutations == 0 ? 'no ratio' : (double) number_format($countMutations / $countNoMutations, 1);
+        $ratio = $countNoMutations == 0 ? 'no ratio' : (float) number_format($countMutations / $countNoMutations, 2, '.', '');
         return [
             "count_mutations" => $countMutations,
             "count_no_mutation" => $countNoMutations,
